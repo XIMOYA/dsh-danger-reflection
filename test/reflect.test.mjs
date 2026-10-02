@@ -654,7 +654,7 @@ test('the review carries the routed tool envelope so the provider accepts the pr
   assert.equal(captured.options.sessionId, 'session-test')
   assert.deepEqual(captured.options.tools, [{ name: 'pwsh', description: 'run', parameters: {} }])
   assert.deepEqual(captured.options.toolHistory, { tools: [], updates: [] })
-  assert.equal(captured.options.maxTokens, 2048)
+  assert.equal(captured.options.maxTokens, 8192)
   assert.equal(captured.options.temperature, 0, 'the reviewer samples deterministically by default')
 })
 

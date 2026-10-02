@@ -49,6 +49,16 @@ DeepSeek Messages tool calls need immediate results
 
 对审查员来说是**无损**的——跟在后面的指令本来就带着同一个调用名、理由和原始参数；而已配对的调用保持原样仍是真正的 tool call，所以重放依然是真实请求的忠实前缀。（DSH 自带的 `compaction-basic` 没有这个问题，是因为它只重放由 `toolPairingBalancedAfter/Before` 保证过配平的区间；我当初重放了没配平的区间。）
 
+### 另一个实测过的失败：输出预算被推理吃掉
+
+`maxOutputTokens` 默认给到 **8192** 是故意的。推理模型会**先花这块预算做隐藏推理**，然后才吐出那个小 JSON；而 DSH 的 DeepSeek 适配器默认 `reasoningEffort` 是 `high`。上限给小了（最初是 2048），审查调用会在说出判定之前就被截断：
+
+```
+the reviewer reply was truncated at maxOutputTokens before any decision
+```
+
+这是实测踩到的第二个失败模式。两者都按同一条规矩处理：**报成「未得出结论」、交还人类**——绝不写成「拒绝」，也绝不静默放行。
+
 ### 模型怎么回答
 
 严格只输出一个 JSON 对象，**两种判定都必须给出 `reason`**：
@@ -126,7 +136,7 @@ DeepSeek Messages tool calls need immediate results
 | `onFailure` | `ask` | 审查**没能作出判定**时（模型报错、超时、输出不合协议）：`ask` 把问题交还给人类；`unavailable` 以「审查无法作答」结束（fail-closed）；`allow` 无判定直接放行 |
 | `timeoutMs` | `120000` | 单次审查调用超时 |
 | `maxContextChars` | `400000` | 重放上下文的上限；超出时保留最近的消息 |
-| `maxOutputTokens` | `2048` | 审查回复的 token 上限 |
+| `maxOutputTokens` | `8192` | 审查调用的 token 上限。**给得宽是故意的**:推理模型会先花这块预算做隐藏推理,DSH 的 DeepSeek 适配器默认 effort 是 `high`,上限给小了就会在说出判定之前被截断(2048 实测踩过) |
 | `temperature` | `0` | 审查采样温度（0 有意义） |
 | `reviewPrompt` | 内置 | 审查员的判断规则，可整个替换 |
 | `announce` | `true` | 是否把审查结果作为消息放进对话（见上） |

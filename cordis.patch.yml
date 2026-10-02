@@ -71,7 +71,7 @@
         onFailure: ask
         timeoutMs: 120000
         maxContextChars: 400000
-        maxOutputTokens: 2048
+        maxOutputTokens: 8192
         # Post the verdict and the reviewer's own wording into the conversation
         # as a user-role notice, so the person can see what was decided and why.
         # The notice also reaches the model, which is what lets a refused command
