@@ -1,0 +1,67 @@
+{
+  "name": "dsh-danger-reflection",
+  "version": "1.0.0",
+  "description": "Danger Reflection (危险反思): a DeepSeek Harness permission preset that replaces the human approval prompt for sandbox escalation with a same-model review that replays the whole conversation.",
+  "license": "MIT",
+  "author": "XIMOYA",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "dsh-plugin",
+    "dsh-bundle",
+    "permission-preset",
+    "approval",
+    "sandbox",
+    "self-review",
+    "agent-safety"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XIMOYA/dsh-danger-reflection.git"
+  },
+  "homepage": "https://github.com/XIMOYA/dsh-danger-reflection#readme",
+  "bugs": {
+    "url": "https://github.com/XIMOYA/dsh-danger-reflection/issues"
+  },
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/en.json": "./locale/en.json",
+    "./locale/zh.json": "./locale/zh.json"
+  },
+  "files": [
+    "lib/",
+    "tools/",
+    "cordis.patch.yml",
+    "locale/",
+    "README.md",
+    "NOTICE",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node test/reflect.test.mjs && node test/client.test.mjs",
+    "check": "node tools/check-patch.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-api-remotes",
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-permission-presets"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

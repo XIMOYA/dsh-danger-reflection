@@ -1,0 +1,47 @@
+# Third-party notices
+
+This project is MIT licensed (see [LICENSE](LICENSE)). It also contains material
+derived from **DeepSeek Harness**, which is distributed under the MIT License,
+and this file records exactly what came from where, as that licence requires.
+
+Upstream: <https://github.com/deepseek-ai/deepseek-harness>
+Upstream licence: MIT — the copyright notice and the full permission text are
+published in that repository, which is the authoritative copy. Each package
+below declares `"license": "MIT"` and `"repository":
+"git+https://github.com/deepseek-ai/deepseek-harness.git"` in its own
+`package.json`.
+
+## `@deepseek-ai/dsh-client-ui-permission-presets`
+
+Used by `lib/client.js`, which seats a component of its own into the same slot so
+the 危险反思 preset can carry an icon (the shipped glyph table is closed and maps
+a glyph to a preset *value*). The ported material is:
+
+- the process-wide permission catalog reader (`PermissionCatalogDirectory`),
+  including its latest-result-wins epoch fencing and generation handling;
+- the preset label rules (`displayPresetName`, `displayPermissionPreset`, the
+  preset-label table, and the Auto badge/description handling);
+- the composer permission control's structure and behaviour (`PermissionSelect`):
+  the trigger, the option list, the busy/disabled states, and the
+  `danger-full-access` / `auto` risk-acknowledgement gate, including its copy;
+- the CSS rules for that control (re-emitted under this project's own class
+  names, in this project's own stylesheet);
+- the `/permission <preset>` submit path used to switch a session's preset.
+
+## `@deepseek-ai/dsh-client-ui-primitives`
+
+Used by `lib/client.js`. The 危险反思 glyph reuses the **shield outline path**
+from `PermissionIconReadOnlyRegular` verbatim, so the new icon belongs to the same
+visual family instead of sitting beside it. Everything else in the glyph (the eye
+and pupil) is original to this project. The component also consumes the package's
+`Menu`, `RiskConfirmation`, and `IconChevronDownOutlineRegular` exports at runtime
+rather than copying them.
+
+## Platform contracts
+
+The mount point (`approval/request`), the slot semantics, the preset-table rules,
+and the wire invariants this project relies on were derived by **reading** the
+published packages — `dsh-user-approval`, `dsh-permission-presets`,
+`dsh-sandbox`, `dsh-llm-deepseek`, `cordis-plugin-loader`,
+`dsh-client-ui-slots`, and `dsh-client-modules`. Reading for interoperability is
+not copying, but the provenance is recorded here so the derivation is traceable.

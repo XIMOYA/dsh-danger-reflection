@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Danger Reflection",
+    "description": "Adds the 危险反思 permission preset: sandbox escalation prompts are answered by a same-model review that replays the whole conversation instead of by the human."
+  }
+}

@@ -1,0 +1,10 @@
+# Nothing here is build output — the plugin is plain ESM and a hand-written
+# browser bundle, so there is no dist/ to publish.
+node_modules/
+pnpm-lock.yaml
+
+# Local scratch
+*.log
+.dsh-*
+.DS_Store
+Thumbs.db

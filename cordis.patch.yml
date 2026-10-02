@@ -1,0 +1,87 @@
+# 危险反思 (Danger Reflection) — profile bundle patch layer.
+#
+# This layer does two things.
+#
+# 1. Adds the `danger-reflection` permission preset to the process catalog, so
+#    the permission selector gains an option labelled 危险反思.
+#
+#    A loader patch replaces `config` WHOLESALE — it is never deep-merged — so
+#    every stock preset is restated exactly as @deepseek-ai/dsh-base declares it.
+#    The stock presets deliberately carry no `name` / `description`: the shipped
+#    client renders its own localized product labels and descriptions for those
+#    three values, and supplying a label here would displace them in every
+#    language. Only the new preset supplies copy, because the client has none
+#    for a host-configured value.
+#
+#    `danger-reflection` is declared LAST on purpose. It shares the
+#    `workspace-write` knob bundle (a confining sandbox plus `ask`), and the
+#    composition default is inferred as the FIRST configured preset matching the
+#    effective knobs, so `workspace-write` must stay ahead of it. Sharing the
+#    bundle is safe and intended: the durable `permission/preset` identity
+#    disambiguates the two, which is exactly how the preset service is specified
+#    to behave when two presets share a bundle.
+#
+#    Why the sandbox stays confining: an approval prompt only ever appears when
+#    a denied operation retries with `sandbox_permissions`. A preset that shipped
+#    `danger-full-access` would never raise one, so nothing would ever be
+#    reviewed. Confinement is what produces the question.
+
+- id: permission
+  name: '@deepseek-ai/dsh-permission-presets'
+  config:
+    presets:
+      read-only:
+        sandbox: read-only
+        approval: ask
+      workspace-write:
+        sandbox: workspace-write
+        approval: ask
+      danger-full-access:
+        sandbox: danger-full-access
+        approval: never
+      danger-reflection:
+        sandbox: workspace-write
+        approval: ask
+        name: 危险反思
+        description: 沙箱范围与「工作区写入」相同；当命令需要更宽权限时不再询问你，而是把整段对话交给当前对话的模型，由它带着上下文审查这次操作并自行决定放行或拒绝。
+
+# 2. Inserts the reviewer that answers this preset's approval requests.
+
+- insert:
+    - id: danger-reflection
+      name: dsh-danger-reflection
+      config:
+        # Presets whose sessions get reviewed. Matches the key above, not its label.
+        presets:
+          - danger-reflection
+        # A reviewer DENY is final: the model's reflection replaces the human
+        # answer. Set to `ask` to keep the human as the second opinion instead.
+        onDeny: reject
+        # An inconclusive review (model error, timeout, or a reply that is not the
+        # agreed decision object) hands the question back to the human answerer
+        # rather than granting silently.
+        #
+        # Note there is no "reject" here, by design: a review that reached no
+        # decision must not be reported as a decision. The approval vocabulary has
+        # no "failed", and its `rejected` outcome is rendered by the caller as
+        # "the user rejected escalating this command" — a judgement nobody made.
+        # `unavailable` is the honest closed form: "no approval channel is
+        # available". `allow` grants with no decision behind it; it is a real
+        # option and a real risk.
+        onFailure: ask
+        timeoutMs: 120000
+        maxContextChars: 400000
+        maxOutputTokens: 2048
+        # Post the verdict and the reviewer's own wording into the conversation
+        # as a user-role notice, so the person can see what was decided and why.
+        # The notice also reaches the model, which is what lets a refused command
+        # be corrected instead of retried blindly.
+        announce: true
+        # Reviewer determinism. Zero is a meaningful value here, not "unset".
+        temperature: 0
+        # Every review, and the build that made it, is recorded as JSON Lines.
+        # A feature that grants escalated permissions without a human should
+        # leave a trail. With no explicit `auditPath`, the file lands at
+        # <DSH home>/danger-reflection/audit.jsonl; `audit: false` turns it off.
+        audit: true
+        auditPath: ''

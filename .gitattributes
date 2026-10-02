@@ -1,0 +1,6 @@
+# Normalize everything to LF, in the repository and in the working tree. This
+# plugin has no build step to absorb the difference, and it is loaded by a
+# path-sensitive module loader — a Windows checkout and a Linux checkout should
+# produce the same bytes.
+* text=auto eol=lf
+*.png binary
